@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-#define N 4
+#define N 8
 #define PI 3.1415926
 class complex_double_t{
 public:
@@ -34,7 +34,8 @@ public:
     }
 
     void output(){
-        std::cout<<real<<"+"<<imag<<"j"<<" ";
+//        std::cout<<real<<"+"<<imag<<"j"<<" ";
+        imag > 0? printf("%.1f+%.1fj ",real,imag):printf("%.1f%.1fj ",real,imag);
     }
 
     double ampl(){
@@ -123,6 +124,7 @@ public:
                 out.signal[n_signal+n_cluster*num_signal_each+gap] = butterflyKnock.out_1;
             }
         }
+        out.output();
     }
 
 
@@ -147,7 +149,7 @@ public:
 };
 
 int main(){
-    complex_double_t s[N] = {{0,0},{1,0},{0,0},{1,0}};
+    complex_double_t s[N] = {{0,0},{1,0},{1,0},{1,0},{0,0},{1,0},{0,0},{1,0}};
     auto a = signal_t(s);
     a.re_order();
     auto b = fft(a);
