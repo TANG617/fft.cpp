@@ -2,7 +2,7 @@
 #include <cmath>
 #include<fstream>
 
-#define N 8
+#define N 1024
 #define PI 3.14159265359
 
 class complex_double_t{
@@ -38,7 +38,7 @@ public:
 
     void output(){
 //        std::cout<<real<<"+"<<imag<<"j"<<" ";
-        imag >= 0? printf("%.1f+%.1fi\n",real,imag):printf("%.1f%.1fi\n",real,imag);
+        imag >= 0? printf("%.4f+%.4fi,",real,imag):printf("%.4f%.4fi,",real,imag);
     }
 
     double ampl(){
@@ -113,7 +113,7 @@ public:
     signal_t in;
     signal_t out;
 
-    complex_double_t out_0,out_1;
+    complex_double_t butterflyKnock_out_0,butterflyKnock_out_1;
 
     stage_t(signal_t in,int n_stage): in(in),n_stage(n_stage){
         gap = (int)pow(2,n_stage - 1);
@@ -122,9 +122,9 @@ public:
 
         for(int n_cluster = 0; n_cluster < num_cluster ; n_cluster++){
             for (int n_signal = 0; n_signal < num_signal_each/2; ++n_signal) {
-                butterfly_knock_t butterflyKnock(in.signal[n_signal+n_cluster*num_signal_each],in.signal[n_signal+n_cluster*num_signal_each+gap],n_signal*gap);
-                out.signal[n_signal+n_cluster*num_signal_each] = butterflyKnock.out_0;
-                out.signal[n_signal+n_cluster*num_signal_each+gap] = butterflyKnock.out_1;
+                butterfly_knock(in.signal[n_signal+n_cluster*num_signal_each],in.signal[n_signal+n_cluster*num_signal_each+gap],n_signal);
+                out.signal[n_signal+n_cluster*num_signal_each] = butterflyKnock_out_0;
+                out.signal[n_signal+n_cluster*num_signal_each+gap] = butterflyKnock_out_1;
             }
         }
 //        out.output();
@@ -135,9 +135,9 @@ public:
         return {cos(rad),sin(rad)};
     }
 
-    void butterfly_knock_t(complex_double_t in_0, complex_double_t in_1, int n_cluster){
-        out_0 = in_0 + in_1 * w(N,n_cluster);
-        out_1 = in_0 - in_1 * w(N,n_cluster);
+    void butterfly_knock(complex_double_t in_0, complex_double_t in_1, int n_cluster){
+        butterflyKnock_out_0 = in_0 + in_1 * w(pow(2,n_stage),n_cluster);
+        butterflyKnock_out_1 = in_0 - in_1 * w(pow(2,n_stage),n_cluster);
     }
 
 
@@ -164,7 +164,7 @@ public:
 };
 
 int main(){
-    freopen("/Users/timli/CLionProjects/FFT/X_4.txt", "r", stdin);
+    freopen("/Users/timli/CLionProjects/FFT/X.txt", "r", stdin);
 
     complex_double_t x[N] ;
     auto s_x = signal_t(x);
@@ -174,6 +174,7 @@ int main(){
     s_x.re_order();
     s_x.output();
     auto s_y = fft(s_x);
-//    freopen("/Users/timli/CLionProjects/FFT/Y_CPP.txt", "w", stdout);
+    freopen("/Users/timli/CLionProjects/FFT/Y_CPP.txt", "w", stdout);
+    std::cout<<std::endl<<"FINAL_FFT"<<std::endl;
     s_y.out.output();
 }
