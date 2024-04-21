@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <chrono>
 #include<fstream>
 
 #define N 1024
@@ -87,23 +88,6 @@ public:
     }
 };
 
-//class butterfly_knock_t{
-//public:
-//    complex_double_t in_0, in_1;
-//    complex_double_t out_0,out_1;
-//    int n_cluster;
-//
-//    complex_double_t w(int n, int i){ //W_n ^i
-//        double rad = -2 * PI * i / n;
-//        return {cos(rad),sin(rad)};
-//    }
-//
-//    butterfly_knock_t(complex_double_t in_0, complex_double_t in_1, int n_cluster):in_0(in_0),in_1(in_1),n_cluster(n_cluster){
-//        out_0 = in_0 + in_1 * w(N,n_cluster);
-//        out_1 = in_0 - in_1 * w(N,n_cluster);
-//    }
-//
-//};
 
 class stage_t{
 public:
@@ -140,10 +124,6 @@ public:
         butterflyKnock_out_1 = in_0 - in_1 * w(pow(2,n_stage),n_cluster);
     }
 
-
-
-
-//    ~stage_t();
 };
 
 
@@ -156,25 +136,31 @@ public:
         for (int n_stage = 1; n_stage <= num_stage; ++n_stage) {
             stage_t cur_stage(out,n_stage);
             out = cur_stage.out;
-            std::cout<<std::endl<<n_stage<<std::endl;
-            out.output();
         }
     }
 
 };
 
 int main(){
-    freopen("/Users/timli/CLionProjects/FFT/X.txt", "r", stdin);
+    auto start = std::chrono::high_resolution_clock::now();
 
-    complex_double_t x[N] ;
-    auto s_x = signal_t(x);
-    s_x.input();
-    s_x.output();
-//    return 0 ;
-    s_x.re_order();
-    s_x.output();
-    auto s_y = fft(s_x);
-    freopen("/Users/timli/CLionProjects/FFT/Y_CPP.txt", "w", stdout);
-    std::cout<<std::endl<<"FINAL_FFT"<<std::endl;
-    s_y.out.output();
+    int maxcycle = 10000;
+    for(int i=0;i<maxcycle;i++)
+    {
+        freopen("/Users/timli/CLionProjects/FFT/X.txt", "r", stdin);
+        complex_double_t x[N] ;
+        auto s_x = signal_t(x);
+        s_x.input();
+        s_x.re_order();
+        auto s_y = fft(s_x);
+//        freopen("/Users/timli/CLionProjects/FFT/Y_CPP.txt", "w", stdout);
+//        s_y.out.output();
+    }
+
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+    std::cout << "Elapsed time each: " << elapsed.count()/maxcycle*1000000 << " us\n";
+    std::cout << "Elapsed time total: " << elapsed.count() << " s\n";
+//    return 0;
+
 }
