@@ -1,7 +1,10 @@
 #include <iostream>
 #include <cmath>
+#include<fstream>
+
 #define N 8
-#define PI 3.1415926
+#define PI 3.14159265359
+
 class complex_double_t{
 public:
     double real,imag;
@@ -35,7 +38,7 @@ public:
 
     void output(){
 //        std::cout<<real<<"+"<<imag<<"j"<<" ";
-        imag > 0? printf("%.1f+%.1fj ",real,imag):printf("%.1f%.1fj ",real,imag);
+        imag >= 0? printf("%.1f+%.1fi\n",real,imag):printf("%.1f%.1fi\n",real,imag);
     }
 
     double ampl(){
@@ -74,35 +77,33 @@ public:
     }
 
     void re_order(){
-        for (int org_i = 0; org_i < N/2; ++org_i) {
-            complex_double_t temp;
-            temp = signal[org_i];
-            signal[org_i] = signal[get_index(org_i)];
-            signal[get_index(org_i)] = temp;
+        for (int org_i = 0; org_i < N; ++org_i) {
+            int tar_i = get_index(org_i);
+            if (tar_i > org_i) { // 只在目标索引大于当前索引时交换，避免重复交换
+                std::swap(signal[org_i], signal[tar_i]);
+            }
         }
 
     }
 };
 
-class butterfly_knock_t{
-public:
-    complex_double_t in_0, in_1;
-    complex_double_t out_0,out_1;
-    int n_cluster;
-
-    complex_double_t w(int n, int i){ //W_n ^i
-        double rad = 2*PI/n*(n - i);
-        return {cos(rad),sin(rad)};
-    }
-
-    butterfly_knock_t(complex_double_t in_0, complex_double_t in_1, int n_cluster):in_0(in_0),in_1(in_1),n_cluster(n_cluster){
-        out_0 = in_0 + in_1 * w(N,n_cluster);
-        out_1 = in_0 - in_1 * w(N,n_cluster);
-    }
-
-
-
-};
+//class butterfly_knock_t{
+//public:
+//    complex_double_t in_0, in_1;
+//    complex_double_t out_0,out_1;
+//    int n_cluster;
+//
+//    complex_double_t w(int n, int i){ //W_n ^i
+//        double rad = -2 * PI * i / n;
+//        return {cos(rad),sin(rad)};
+//    }
+//
+//    butterfly_knock_t(complex_double_t in_0, complex_double_t in_1, int n_cluster):in_0(in_0),in_1(in_1),n_cluster(n_cluster){
+//        out_0 = in_0 + in_1 * w(N,n_cluster);
+//        out_1 = in_0 - in_1 * w(N,n_cluster);
+//    }
+//
+//};
 
 class stage_t{
 public:
@@ -112,8 +113,10 @@ public:
     signal_t in;
     signal_t out;
 
+    complex_double_t out_0,out_1;
+
     stage_t(signal_t in,int n_stage): in(in),n_stage(n_stage){
-        gap = pow(2,n_stage - 1);
+        gap = (int)pow(2,n_stage - 1);
         num_signal_each = pow(2,n_stage);
         num_cluster = N / num_signal_each;
 
@@ -124,7 +127,17 @@ public:
                 out.signal[n_signal+n_cluster*num_signal_each+gap] = butterflyKnock.out_1;
             }
         }
-        out.output();
+//        out.output();
+    }
+
+    complex_double_t w(int n, int i){ //W_n ^i
+        double rad = -2 * PI * i / n;
+        return {cos(rad),sin(rad)};
+    }
+
+    void butterfly_knock_t(complex_double_t in_0, complex_double_t in_1, int n_cluster){
+        out_0 = in_0 + in_1 * w(N,n_cluster);
+        out_1 = in_0 - in_1 * w(N,n_cluster);
     }
 
 
@@ -143,15 +156,24 @@ public:
         for (int n_stage = 1; n_stage <= num_stage; ++n_stage) {
             stage_t cur_stage(out,n_stage);
             out = cur_stage.out;
+            std::cout<<std::endl<<n_stage<<std::endl;
+            out.output();
         }
     }
 
 };
 
 int main(){
-    complex_double_t s[N] = {{0,0},{1,0},{1,0},{1,0},{0,0},{1,0},{0,0},{1,0}};
-    auto a = signal_t(s);
-    a.re_order();
-    auto b = fft(a);
-    b.out.output();
+    freopen("/Users/timli/CLionProjects/FFT/X_4.txt", "r", stdin);
+
+    complex_double_t x[N] ;
+    auto s_x = signal_t(x);
+    s_x.input();
+    s_x.output();
+//    return 0 ;
+    s_x.re_order();
+    s_x.output();
+    auto s_y = fft(s_x);
+//    freopen("/Users/timli/CLionProjects/FFT/Y_CPP.txt", "w", stdout);
+    s_y.out.output();
 }
